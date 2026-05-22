@@ -69,6 +69,14 @@ app.use(
 app.use(express.json());
 app.use(requestMetricsMiddleware);
 
+app.get("/healthz", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "burn-token-backend",
+    now: new Date().toISOString()
+  });
+});
+
 process.on("unhandledRejection", (reason) => {
   captureException(reason, { type: "unhandledRejection" });
 });

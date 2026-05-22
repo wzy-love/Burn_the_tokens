@@ -48,6 +48,15 @@ npm run docker:up
 npm run docker:down
 ```
 
+## 线上部署（无卡优先：Koyeb + GitHub Pages）
+
+如果 Render 要求绑卡，可以直接用 Koyeb 托管后端（前端继续用 GitHub Pages）。
+
+- 后端：Koyeb（Root Directory: `backend`）
+- 前端：GitHub Pages（`https://wzy-love.github.io/Burn_the_tokens/`）
+
+详细步骤见：`docs/koyeb-no-card-deploy.md`
+
 ## 线上部署（GitHub Pages + Render）
 
 适合你现在这种「博客在 GitHub Pages，游戏要长期给别人玩」的场景：
@@ -211,6 +220,7 @@ npm run test
 - `one-click-online.bat`：一键开服并开启公网隧道（最推荐）  
 - `one-click-online-fast.bat`：一键生产模式开服并开启公网隧道（更快）  
 - `docs/zero-cost-tunnel.md`：免费公网分享说明  
+- `docs/koyeb-no-card-deploy.md`：Koyeb 无卡部署说明  
 
 ## API 概览
 
