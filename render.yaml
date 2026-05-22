@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: burn-token-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npm run db:generate && npm run db:push
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: LOG_LEVEL
+        value: info
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 2h
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 14d
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://wzy-love.github.io

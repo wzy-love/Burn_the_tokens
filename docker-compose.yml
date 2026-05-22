@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: burn-token-backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend/prisma:/app/prisma
+      - ./backend/dev.db:/app/dev.db
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE: /api
+    container_name: burn-token-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
