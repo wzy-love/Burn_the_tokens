@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Player {
+  id                String              @id
+  name              String
+  username          String?             @unique
+  email             String?             @unique
+  passwordHash      String?
+  tokensLeft        Int                 @default(1000)
+  highestTokens     Int                 @default(1000)
+  totalBurned       Int                 @default(0)
+  totalReward       Int                 @default(0)
+  streak            Int                 @default(0)
+  bestStreak        Int                 @default(0)
+  rounds            Int                 @default(0)
+  seasonPoints      Int                 @default(0)
+  inventoryShield   Int                 @default(2)
+  inventoryDouble   Int                 @default(1)
+  inventoryLucky    Int                 @default(1)
+  dailyDayKey       String              @default("")
+  dailyRounds       Int                 @default(0)
+  dailyWins         Int                 @default(0)
+  dailyJackpots     Int                 @default(0)
+  lastLoginDate     String              @default("")
+  loginStreak       Int                 @default(0)
+  isBanned          Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  burns             BurnLog[]
+  questClaims       QuestClaim[]
+  achievements      AchievementUnlock[]
+  leaderboardScores LeaderboardEntry[]
+  leftFriendLinks   Friendship[]        @relation("FriendshipLeft")
+  rightFriendLinks  Friendship[]        @relation("FriendshipRight")
+  challengesSent    PkChallenge[]       @relation("PkChallenger")
+  challengesRecv    PkChallenge[]       @relation("PkOpponent")
+  challengeWins     PkChallenge[]       @relation("PkWinner")
+  hostedRooms       BattleRoom[]        @relation("BattleRoomHost")
+  roomEntries       BattleRoomEntry[]
+  shareReports      ShareReport[]
+}
+
+model BurnLog {
+  id             String   @id
+  playerId       String
+  burnAmount     Int
+  reward         Int
+  delta          Int
+  outcome        String
+  multiplier     Int
+  usedItems      String
+  shieldTriggered Boolean  @default(false)
+  doubleTriggered Boolean  @default(false)
+  bossRound      Boolean   @default(false)
+  bossDefeated   Boolean   @default(false)
+  createdAt      DateTime @default(now())
+  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, createdAt])
+}
+
+model QuestClaim {
+  id        String   @id
+  playerId  String
+  questId   String
+  dayKey    String
+  createdAt DateTime @default(now())
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, questId, dayKey])
+  @@index([playerId, dayKey])
+}
+
+model AchievementUnlock {
+  id         String   @id
+  playerId   String
+  code       String
+  title      String
+  createdAt  DateTime @default(now())
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, code])
+}
+
+model LeaderboardEntry {
+  id          String   @id
+  playerId    String
+  name        String
+  tokens      Int
+  rounds      Int
+  seasonId    String
+  seasonPoints Int
+  createdAt   DateTime @default(now())
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([seasonId, tokens, seasonPoints])
+}
+
+model Friendship {
+  id        String   @id
+  leftId    String
+  rightId   String
+  createdAt DateTime @default(now())
+  left      Player   @relation("FriendshipLeft", fields: [leftId], references: [id], onDelete: Cascade)
+  right     Player   @relation("FriendshipRight", fields: [rightId], references: [id], onDelete: Cascade)
+
+  @@unique([leftId, rightId])
+}
+
+model PkChallenge {
+  id             String   @id
+  challengerId   String
+  opponentId     String
+  wager          Int      @default(0)
+  status         String   @default("open")
+  challengerScore Int?
+  opponentScore  Int?
+  winnerId       String?
+  createdAt      DateTime @default(now())
+  resolvedAt     DateTime?
+  challenger     Player   @relation("PkChallenger", fields: [challengerId], references: [id], onDelete: Cascade)
+  opponent       Player   @relation("PkOpponent", fields: [opponentId], references: [id], onDelete: Cascade)
+  winner         Player?  @relation("PkWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+
+  @@index([challengerId, createdAt])
+  @@index([opponentId, createdAt])
+}
+
+model BattleRoom {
+  code       String           @id
+  hostId     String
+  status     String           @default("open")
+  createdAt  DateTime         @default(now())
+  host       Player           @relation("BattleRoomHost", fields: [hostId], references: [id], onDelete: Cascade)
+  entries    BattleRoomEntry[]
+}
+
+model BattleRoomEntry {
+  id        String    @id
+  roomCode  String
+  playerId  String
+  score     Int       @default(0)
+  joinedAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  room      BattleRoom @relation(fields: [roomCode], references: [code], onDelete: Cascade)
+  player    Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([roomCode, playerId])
+}
+
+model ShareReport {
+  id         String   @id
+  shareCode  String   @unique
+  playerId   String
+  burnLogId  String?
+  title      String
+  payload    String
+  createdAt  DateTime @default(now())
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
